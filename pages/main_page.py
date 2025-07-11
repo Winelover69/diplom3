@@ -1,6 +1,4 @@
-# ui_tests/pages/main_page.py
-
-from pages.base_page import BasePage
+from .base_page import BasePage
 from utils.locators import MainPageLocators
 # import logging # Если вы используете локальный логгер для этой страницы, раскомментируйте
 

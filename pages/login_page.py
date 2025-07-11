@@ -1,39 +1,45 @@
-# ui_tests/pages/login_page.py
-
 from pages.base_page import BasePage
 from utils.locators import LoginPageLocators
-# import logging
-
-# logger = logging.getLogger(__name__)
+import allure
+from config import BASE_URL # Импортируем BASE_URL из конфига для формирования полного URL страницы
 
 class LoginPage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
-        self.path = "/login"
+        # Полный URL для страницы логина
+        self.url = f"{BASE_URL}login"
         self.locators = LoginPageLocators
 
     @allure.step("Переход на страницу логина")
-    def go_to_login_page(self):
+    def open_login_page(self):
         """Переходит на страницу логина и ожидает загрузки заголовка."""
-        self.open(self.path)
-        self.wait_for_visibility(self.locators.LOGIN_TITLE)
-        # logger.info("Переход на страницу логина выполнен.")
+        self.open(self.url)
+        # Используем новый метод для ожидания видимости
+        self.wait_for_visibility_of_element(self.locators.LOGIN_BUTTON_ON_FORM)
 
-    @allure.step("Ввод Email")
+    @allure.step("Ввод Email: {email}")
     def enter_email(self, email):
         """Вводит Email в соответствующее поле."""
-        self.find_element(self.locators.EMAIL_INPUT).send_keys(email)
-        # logger.info(f"Введен Email: {email}")
+        # Используем новый метод для ожидания присутствия
+        self.wait_for_presence_of_element(self.locators.EMAIL_INPUT).send_keys(email)
 
     @allure.step("Ввод пароля")
     def enter_password(self, password):
         """Вводит пароль в соответствующее поле."""
-        self.find_element(self.locators.PASSWORD_INPUT).send_keys(password)
-        # logger.info("Введен пароль (скрыто).")
+        # Используем новый метод для ожидания присутствия
+        self.wait_for_presence_of_element(self.locators.PASSWORD_INPUT).send_keys(password)
 
     @allure.step("Клик по кнопке 'Войти'")
-    def click_login_button(self):
+    def click_login_button_on_form(self):
         """Кликает по кнопке 'Войти' и ожидает перехода на главную страницу."""
-        self.click_element(self.locators.LOGIN_BUTTON)
-        self.wait_for_url_change("/") # Ожидаем редирект на главную страницу
-        # logger.info("Клик по кнопке 'Войти' выполнен. Ожидается редирект на главную.")
+        # Используем click_element, который уже включает ожидание видимости
+        self.click_element(self.locators.LOGIN_BUTTON_ON_FORM)
+        # Ожидаем, что URL будет содержать базовый после логина (редирект на главную)
+        self.wait_for_url_contains(BASE_URL)
+
+    @allure.step("Выполнение авторизации с Email: {email}")
+    def login(self, email, password):
+        """Выполняет полную процедуру авторизации."""
+        self.enter_email(email)
+        self.enter_password(password)
+        self.click_login_button_on_form()
